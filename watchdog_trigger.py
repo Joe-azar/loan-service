@@ -22,10 +22,13 @@ class MyHandler(FileSystemEventHandler):
             file_path = event.src_path
             print(f"File {file_path} has been created.")
             
-            with open(file_path, "r", encoding="utf-8") as file:
-                loan_request = file.read()
-                print(f"File Content:\n{loan_request}")
-                send_loan_to_composite_service(loan_request)
+            try:
+                with open(file_path, "r", encoding="utf-8") as file:
+                    loan_request = file.read()
+                    print(f"File Content:\n{loan_request}")
+                    send_loan_to_composite_service(loan_request)
+            except Exception as e:
+                print(f"Error reading the file {file_path}: {e}")
 
 directory_to_watch = "./data"
 
