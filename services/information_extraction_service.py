@@ -27,21 +27,22 @@ conn.commit()
 
 # Prétraitement du texte
 def preprocess_text(loan_request):
-    # Supprimer les espaces en trop, normaliser les caractères spéciaux
     loan_request = loan_request.strip()
     loan_request = re.sub(r'\s+', ' ', loan_request)  # Remplacer les espaces multiples par un seul
     return loan_request
 
 # Stockage des informations extraites dans la base de données
 def store_extracted_info(info):
-    c.execute('''
-        INSERT INTO loan_requests (name, address, email, phone, loan_amount, 
-            monthly_income, monthly_expenses, duration, property_description)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (info['Nom'], info['Adresse'], info['Email'], info['Téléphone'], 
-          info['Montant du Prêt'], info['Revenu Mensuel'], 
-          info['Dépenses Mensuelles'], info['Durée'], info['Description de la Propriété']))
-    conn.commit()
+    with sqlite3.connect('loan_requests.db') as conn:
+        c = conn.cursor()
+        c.execute('''
+            INSERT INTO loan_requests (name, address, email, phone, loan_amount, 
+                monthly_income, monthly_expenses, duration, property_description)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (info['Nom'], info['Adresse'], info['Email'], info['Téléphone'], 
+              info['Montant du Prêt'], info['Revenu Mensuel'], 
+              info['Dépenses Mensuelles'], info['Durée'], info['Description de la Propriété']))
+        conn.commit()
 
 # Define a complex type for key-value pairs
 class DictionaryItem(ComplexModel):
@@ -54,7 +55,6 @@ class InformationExtractionService(ServiceBase):
     def extract_loan_information(ctx, loan_request):
         loan_request = preprocess_text(loan_request)  # Prétraitement du texte
         
-        # Extraction des données avec gestion des erreurs spécifiques
         try:
             nom = re.search(r'Nom du Client: (.+)', loan_request).group(1)
         except AttributeError:
@@ -119,7 +119,7 @@ class InformationExtractionService(ServiceBase):
         # Retourner les informations extraites
         return DictionaryItem(key="extracted_info", value=str(extracted_info))
 
-# Create a Spyne application
+# Créer l'application Spyne
 application = Application([InformationExtractionService],
                           tns='information.extraction.service',
                           in_protocol=Soap11(validator='lxml'),
