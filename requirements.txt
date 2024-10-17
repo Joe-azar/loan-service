@@ -1,0 +1,5 @@
+spyne==2.13.16
+watchdog==2.1.9
+tk==0.1.0
+suds-py3==1.4.5
+sqlite3==0.9.6
