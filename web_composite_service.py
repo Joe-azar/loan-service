@@ -32,8 +32,8 @@ class LoanEvaluationService(ServiceBase):
             approval_client = Client(approval_service_url)
             decision = approval_client.service.make_decision(
                 solvency_score, property_value, extracted_info['Montant du Prêt'], 
-                "Stable",  # Emploi fictif pour l'exemple
-                "Good"     # Historique de crédit fictif pour l'exemple
+                "Stable",  
+                "Good"    
             )
             
             return f"Decision: {decision}, Solvency Score: {solvency_score}, Property Value: {property_value}"
